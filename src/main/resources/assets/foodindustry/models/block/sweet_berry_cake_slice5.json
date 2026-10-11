@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cake_slice5",
+  "textures": {
+    "particle": "foodindustry:block/sweet_berry_cake_side",
+    "bottom": "foodindustry:block/sweet_berry_cake_bottom",
+    "top": "foodindustry:block/sweet_berry_cake_top",
+    "side": "foodindustry:block/sweet_berry_cake_side",
+    "inside": "foodindustry:block/sweet_berry_cake_inner"
+  }
+}

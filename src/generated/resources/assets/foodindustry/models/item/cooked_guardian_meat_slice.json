@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "foodindustry:item/cooked_guardian_meat_slice"
+  }
+}

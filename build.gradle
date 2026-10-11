@@ -1,0 +1,227 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenLocal()
+    // JEI 的发布仓库
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+    }
+    // Modrinth Maven：Farmer's Delight 等模组依赖
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // Access Transformer 会被自动探测（src/main/resources/META-INF/accesstransformer.cfg）
+    // accessTransformers.add('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        // 跑游戏内测试（GameTest）后退出，用于验证机器方块
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            // 数据生成输出到 src/generated/resources，同时以 src/main/resources 作为已有资源来源
+            programArguments.addAll '--mod', project.mod_id, '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// 把数据生成的产物也纳入资源目录
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// 注意：src/generated/resources/.cache 是 Minecraft DataGenerator 的**增量缓存**
+// （记录哪些生成文件没变，让 runData 只写变动的那几个），对游戏运行时毫无用处。
+// 但 processResources 会把它一起复制到 build/resources/main，jar 又照单全收，
+// 于是它会被打进发布产物。这里从 jar 里剔掉（约 28 KB / 10 个文件）。
+// 不删源目录里的那份，runData 的增量能力照旧。
+tasks.named('jar', Jar) {
+    exclude '.cache/**'
+    exclude '.cache'
+}
+
+// ============================================================================
+//  依赖
+//
+//  两类依赖，处理方式不同：
+//
+//  ① compileOnly —— 只为了编译期能引用对方的类。不进 POM、不进发布 jar。
+//  ② devMods     —— 开发运行时需要的模组 jar。由下面的 syncDevMods 任务复制到
+//                   run/mods/。
+//
+//  ★ 为什么运行期必须走 run/mods 而不是 classpath：
+//    ModDevGradle 的 dev 运行里，FML 只把 run/mods 里的 jar 当作 mod
+//    （legacy classpath 上的 jar 只被当成普通库），所以放在 classpath 上的前置
+//    会导致 "Currently, farmersdelight is not installed"。
+//    而如果同一个模组同时出现在 classpath 和 run/mods，又会因为模块重复而崩：
+//      ResolutionException: Module farmersdelight contains package ...,
+//      module farmers.delight exports package ... to farmersdelight
+//    所以：依赖只写 compileOnly，运行期统一交给 run/mods。
+// ============================================================================
+configurations {
+    devMods {
+        canBeConsumed = false
+        canBeResolved = true
+        description = '开发运行时需要的模组，会被复制到 run/mods'
+    }
+}
+
+dependencies {
+    // ---- 硬前置：Farmer's Delight 1.21.1-1.3.4 ----
+    compileOnly "maven.modrinth:farmers-delight:${farmersdelight_version}"
+    devMods "maven.modrinth:farmers-delight:${farmersdelight_version}"
+    // 离线备选（把 jar 放进 libs/ 后改用这两行）：
+    // compileOnly files("libs/${farmersdelight_jar}")
+    // devMods files("libs/${farmersdelight_jar}")
+
+    // ---- 软兼容：JEI（编译只要 api；运行时装完整版）----
+    compileOnly "mezz.jei:jei-1.21.1-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
+    // transitive = false：只把 JEI 本体复制进 run/mods。
+    // 它的库（jei-lib / gui / common-api / jspecify / annotations…）不是 mod，
+    // 复制过去只会让 FML 每次启动都刷一串 "is not a valid mod file" 警告；
+    // 这些库本来就由 JEI 自己的 jar-in-jar 提供（见启动日志的 JarInJarDependencyLocator）。
+    devMods("mezz.jei:jei-1.21.1-neoforge:${jei_version}") {
+        transitive = false
+    }
+
+    // ---- 软兼容：Jade（没有公共 Maven，把 jar 放进 libs/ 后启用）----
+    // compileOnly files("libs/${jade_jar}")
+    // devMods files("libs/${jade_jar}")
+
+    // ---- 开发期辅助：AppleSkin（"苹果皮"）----
+    // **不是依赖**：它只在物品提示/HUD 上多显示饥饿值、饱和度、消耗值，
+    // 用来核对本模组食物的数值是否与出处一致。两端都是 optional，
+    // 所以只放 devMods（进 run/mods），不写 compileOnly、不进发布 jar。
+    // 不需要它时把下面这行注释掉即可。
+    devMods("maven.modrinth:appleskin:${appleskin_version}") {
+        transitive = false
+    }
+}
+
+// 把 devMods 里的模组同步到 run/mods。
+// 先删掉本任务管理的旧 jar，避免版本升级后新旧两份同时存在又触发模块重复。
+var syncDevMods = tasks.register('syncDevMods', Copy) {
+    group = 'neoforge'
+    description = '把开发运行需要的模组复制到 run/mods'
+    from configurations.devMods
+    into layout.projectDirectory.dir('run/mods')
+    doFirst {
+        delete fileTree(layout.projectDirectory.dir('run/mods')) {
+            // 前置
+            include 'FarmersDelight-*.jar'
+            include 'farmers-delight-*.jar'
+            // 软兼容本体
+            include 'jei-*.jar'
+            include 'Jade-*.jar'
+            // 开发期辅助（AppleSkin / 苹果皮）
+            include 'appleskin-*.jar'
+            // 它们的传递依赖（不是 mod，只是以防早期版本把库复制进来留下残留）
+            include 'annotations-*.jar'
+            include 'jspecify-*.jar'
+            include 'mezz_config-*.jar'
+            include 'deduplicating-runner-*.jar'
+        }
+    }
+}
+
+// 所有开发运行前先同步模组
+['runClient', 'runServer', 'runData', 'runGameTestServer'].each { runTaskName ->
+    tasks.matching { it.name == runTaskName }.configureEach {
+        dependsOn syncDevMods
+    }
+}
+
+// 把 gradle.properties 里的占位符展开进 neoforge.mods.toml
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_version      : minecraft_version,
+                             minecraft_version_range: minecraft_version_range,
+                             neo_version            : neo_version,
+                             neo_version_range      : neo_version_range,
+                             loader_version_range   : loader_version_range,
+                             mod_id                 : mod_id,
+                             mod_name               : mod_name,
+                             mod_license            : mod_license,
+                             mod_version            : mod_version,
+                             mod_authors            : mod_authors,
+                             mod_description        : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+// IDEA 不会自动下载依赖的 sources/javadoc，这里显式打开
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

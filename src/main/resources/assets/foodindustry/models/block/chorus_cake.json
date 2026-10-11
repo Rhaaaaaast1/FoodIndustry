@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cake",
+  "textures": {
+    "particle": "foodindustry:block/chorus_cake_side",
+    "bottom": "foodindustry:block/chorus_cake_bottom",
+    "top": "foodindustry:block/chorus_cake_top",
+    "side": "foodindustry:block/chorus_cake_side",
+    "inside": "foodindustry:block/chorus_cake_inner"
+  }
+}

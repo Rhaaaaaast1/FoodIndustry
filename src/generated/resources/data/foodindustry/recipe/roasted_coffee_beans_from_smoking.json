@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.35,
+  "ingredient": {
+    "item": "foodindustry:raw_coffee_beans"
+  },
+  "result": {
+    "count": 1,
+    "id": "foodindustry:roasted_coffee_beans"
+  }
+}

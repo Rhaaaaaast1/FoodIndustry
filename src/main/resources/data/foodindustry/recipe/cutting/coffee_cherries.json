@@ -1,0 +1,25 @@
+{
+  "type": "farmersdelight:cutting",
+  "ingredients": [
+    {
+      "item": "foodindustry:coffee_cherries"
+    }
+  ],
+  "result": [
+    {
+      "item": {
+        "count": 8,
+        "id": "foodindustry:raw_coffee_beans"
+      }
+    }
+  ],
+  "tool": [
+    {
+      "type": "farmersdelight:item_ability",
+      "action": "knife_dig"
+    },
+    {
+      "tag": "c:tools/knife"
+    }
+  ]
+}

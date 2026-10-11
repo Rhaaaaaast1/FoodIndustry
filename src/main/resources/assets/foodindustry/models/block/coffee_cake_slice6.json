@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cake_slice6",
+  "textures": {
+    "particle": "foodindustry:block/coffee_cake_side",
+    "bottom": "foodindustry:block/coffee_cake_bottom",
+    "top": "foodindustry:block/coffee_cake_top",
+    "side": "foodindustry:block/coffee_cake_side",
+    "inside": "foodindustry:block/coffee_cake_inner"
+  }
+}

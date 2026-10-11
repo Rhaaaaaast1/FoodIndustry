@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "foodindustry:white_grapes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "foodindustry:white_grape_seeds"
+  }
+}

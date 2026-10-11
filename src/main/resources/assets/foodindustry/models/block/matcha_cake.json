@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cake",
+  "textures": {
+    "particle": "foodindustry:block/matcha_cake_side",
+    "bottom": "foodindustry:block/matcha_cake_bottom",
+    "top": "foodindustry:block/matcha_cake_top",
+    "side": "foodindustry:block/matcha_cake_side",
+    "inside": "foodindustry:block/matcha_cake_inner"
+  }
+}

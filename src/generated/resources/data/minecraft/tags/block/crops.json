@@ -1,0 +1,19 @@
+{
+  "values": [
+    "foodindustry:corn",
+    "foodindustry:peanut",
+    "foodindustry:chili",
+    "foodindustry:pineapple",
+    "foodindustry:soybean",
+    "foodindustry:cucumber",
+    "foodindustry:cucumber_vine",
+    "foodindustry:white_grape",
+    "foodindustry:white_grape_vine",
+    "foodindustry:red_grape",
+    "foodindustry:red_grape_vine",
+    "foodindustry:tea_bush",
+    "foodindustry:blueberry_bush",
+    "foodindustry:coffee_bush",
+    "foodindustry:sunflower_crop"
+  ]
+}

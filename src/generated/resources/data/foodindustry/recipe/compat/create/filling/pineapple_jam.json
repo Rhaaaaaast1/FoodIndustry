@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "type": "create:filling",
+  "ingredients": [
+    {
+      "item": "minecraft:bowl"
+    },
+    {
+      "type": "neoforge:single",
+      "amount": 250,
+      "fluid": "foodindustry:pineapple_jam"
+    }
+  ],
+  "results": [
+    {
+      "id": "foodindustry:pineapple_jam"
+    }
+  ]
+}

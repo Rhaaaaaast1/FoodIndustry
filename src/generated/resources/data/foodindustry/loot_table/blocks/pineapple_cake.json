@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "foodindustry:pineapple_cake"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "foodindustry:blocks/pineapple_cake"
+}

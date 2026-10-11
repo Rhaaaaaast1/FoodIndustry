@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "has_wild_crop": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#farmersdelight:wild_crops"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.foodindustry.wild_crops.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "foodindustry:wild_chili"
+    },
+    "title": {
+      "translate": "advancement.foodindustry.wild_crops.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_wild_crop"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

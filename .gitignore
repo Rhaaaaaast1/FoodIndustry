@@ -1,0 +1,25 @@
+# MacOS DS_Store files
+.DS_Store
+
+# Gradle cache folder
+.gradle
+
+# Gradle build folder
+build
+
+# IntelliJ
+out/
+.idea
+*.iml
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Common working directory
+run
+
+# Minecraft DataGenerator 的增量缓存（src/generated/resources/.cache）：
+# 只是"哪些生成文件没变"的清单，不该进版本库，也不该进发布 jar（jar 里已由 build.gradle 排除）
+.cache/

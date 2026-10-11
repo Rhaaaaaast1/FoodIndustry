@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "foodindustry:chili_pepper"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "foodindustry:chili_seeds"
+  }
+}

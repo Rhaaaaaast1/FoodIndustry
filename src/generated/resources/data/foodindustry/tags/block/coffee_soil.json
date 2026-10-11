@@ -1,0 +1,25 @@
+{
+  "values": [
+    "minecraft:podzol",
+    {
+      "id": "farmersdelight:rich_soil",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:rich_soil_farmland",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:resurgent_soil",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:resurgent_soil_farmland",
+      "required": false
+    },
+    {
+      "id": "nethersdelight:rich_soul_soil",
+      "required": false
+    }
+  ]
+}
