@@ -35,6 +35,15 @@ public final class ModCapabilities {
 
     /** 挂到 mod 事件总线（能力注册属于 mod 事件，不是游戏事件）。 */
     public static void register(RegisterCapabilitiesEvent event) {
+        // ⚠️ 发酵木桶的方块能力（物品面/流体面的严格单向）已随木桶一起暂时移除。
+        //    恢复时要加回：
+        //      event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+        //              ModBlockEntities.FERMENTATION_BARREL.get(),
+        //              (barrel, side) -> barrel.itemHandler(side));
+        //      event.registerBlockEntity(Capabilities.FluidHandler.BLOCK,
+        //              ModBlockEntities.FERMENTATION_BARREL.get(),
+        //              (barrel, side) -> barrel.fluidHandler(side));
+
         for (ModFluids.MilkLike milkLike : ModFluids.allMilkLike()) {
             // 桶：沿用 NeoForge 自带的包装器
             if (milkLike.bucket() != null) {

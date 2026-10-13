@@ -1,0 +1,133 @@
+{
+  "values": {
+    "foodindustry:blueberries": {
+      "chance": 0.65
+    },
+    "foodindustry:blueberry_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:chili_pepper": {
+      "chance": 0.65
+    },
+    "foodindustry:chili_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:coffee_cherries": {
+      "chance": 0.65
+    },
+    "foodindustry:corn": {
+      "chance": 0.65
+    },
+    "foodindustry:corn_kernels": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:cucumber": {
+      "chance": 0.65
+    },
+    "foodindustry:cucumber_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:eggplant": {
+      "chance": 0.65
+    },
+    "foodindustry:eggplant_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:peanuts": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:pineapple": {
+      "chance": 0.65
+    },
+    "foodindustry:pineapple_crown": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:pineapple_sapling": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:raw_coffee_beans": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:red_grape_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:red_grapes": {
+      "chance": 0.65
+    },
+    "foodindustry:soybeans": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:strawberries": {
+      "chance": 0.65
+    },
+    "foodindustry:strawberry_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:sunflower_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:tea_leaves": {
+      "chance": 0.65
+    },
+    "foodindustry:tea_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:white_grape_seeds": {
+      "can_villager_compost": true,
+      "chance": 0.3
+    },
+    "foodindustry:white_grapes": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_blueberry": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_chili": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_coffee": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_corn": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_cucumber": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_peanut": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_pineapple": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_red_grape": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_soybean": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_strawberry": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_tea": {
+      "chance": 0.65
+    },
+    "foodindustry:wild_white_grape": {
+      "chance": 0.65
+    }
+  }
+}

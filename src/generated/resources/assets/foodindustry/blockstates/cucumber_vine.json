@@ -4,12 +4,24 @@
       "model": "foodindustry:block/cucumber_vine_stage0"
     },
     "age=1": {
-      "model": "foodindustry:block/cucumber_vine_stage1"
+      "model": "foodindustry:block/cucumber_vine_stage0"
     },
     "age=2": {
-      "model": "foodindustry:block/cucumber_vine_stage2"
+      "model": "foodindustry:block/cucumber_vine_stage1"
     },
     "age=3": {
+      "model": "foodindustry:block/cucumber_vine_stage1"
+    },
+    "age=4": {
+      "model": "foodindustry:block/cucumber_vine_stage2"
+    },
+    "age=5": {
+      "model": "foodindustry:block/cucumber_vine_stage2"
+    },
+    "age=6": {
+      "model": "foodindustry:block/cucumber_vine_stage3"
+    },
+    "age=7": {
       "model": "foodindustry:block/cucumber_vine_stage3"
     }
   }

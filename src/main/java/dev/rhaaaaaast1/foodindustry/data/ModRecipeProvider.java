@@ -30,9 +30,10 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput recipeOutput) {
-        // 蓝莓、辣椒、草莓、黄瓜、白葡萄、红葡萄：一份产物 → 一份种子
+        // 蓝莓、辣椒、茄子、草莓、黄瓜、白葡萄、红葡萄：一份产物 → 一份种子
         seedFrom(recipeOutput, ModItems.BLUEBERRIES.get(), ModItems.BLUEBERRY_SEEDS.get());
         seedFrom(recipeOutput, ModItems.CHILI_PEPPER.get(), ModItems.CHILI_SEEDS.get());
+        seedFrom(recipeOutput, ModItems.EGGPLANT.get(), ModItems.EGGPLANT_SEEDS.get());
         seedFrom(recipeOutput, ModItems.STRAWBERRIES.get(), ModItems.STRAWBERRY_SEEDS.get());
         seedFrom(recipeOutput, ModItems.CUCUMBER.get(), ModItems.CUCUMBER_SEEDS.get());
         seedFrom(recipeOutput, ModItems.WHITE_GRAPES.get(), ModItems.WHITE_GRAPE_SEEDS.get());
@@ -41,9 +42,13 @@ public class ModRecipeProvider extends RecipeProvider {
         // 玉米也不在这里：玉米棒是**砧板切**成 32 颗玉米粒（手写 cutting 配方）。
         // 生豆烘焙 → Create 石磨磨粉 → Create 混合盆加热成咖啡流体（见 compat/create 的 provider）。
         roastCoffeeBeans(recipeOutput);
+        // ⚠️ 发酵木桶的配方（foodindustry:fermenting，4 大豆 + 1 草杆 + 1B 水 → 1B 酱油）
+        //    已随木桶一起暂时移除。恢复时把 fermentingRecipes(...) 那段加回来，
+        //    并还原 ModRecipes 里的 FERMENTING_TYPE / FERMENTING_SERIALIZER。
 
         FoodIndustry.LOGGER.debug("[{}] 工作台配方生成完毕", FoodIndustry.MODID);
     }
+
 
     /** 无序合成：一份产物取出一份种子。 */
     private void seedFrom(RecipeOutput output, Item produce, Item seeds) {

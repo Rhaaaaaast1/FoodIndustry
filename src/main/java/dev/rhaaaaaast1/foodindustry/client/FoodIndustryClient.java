@@ -61,6 +61,10 @@ public final class FoodIndustryClient {
             Map.entry("peanut_butter", 0xFFC08A4A),
             // 食用油
             Map.entry("cooking_oil", 0xFFE8D24A),
+            // 酱油：深褐近黑（发酵产物，比咖啡更暗更红）
+            Map.entry("soy_sauce", 0xFF3A1F0E),
+            // 醋：琥珀褐（比酱油浅、更偏红黄 —— 和酱油瓶贴图的换色方向一致）
+            Map.entry("vinegar", 0xFF9A5A18),
             // compat
             Map.entry("tomato_sauce", 0xFFC63A22),
             Map.entry("chorus_sauce", 0xFF9A5AA8));
@@ -71,6 +75,8 @@ public final class FoodIndustryClient {
         modEventBus.addListener(FoodIndustryClient::registerItemColors);
         // 粪便投掷物的渲染器（纯逻辑实体，直接用原版的投掷物渲染器，和雪球同一个）
         modEventBus.addListener(FoodIndustryClient::registerEntityRenderers);
+        // 菜单界面（发酵木桶）
+        modEventBus.addListener(FoodIndustryClient::registerScreens);
         // 物品提示统一处理器（士腻架的玩梗提示 + 被停用内容的说明）
         ItemTooltipHandler.register();
         // 让模组列表里的配置按钮打开 NeoForge 自带的配置界面
@@ -81,6 +87,17 @@ public final class FoodIndustryClient {
     private static void registerEntityRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(dev.rhaaaaaast1.foodindustry.common.registry.ModEntities.MANURE_PROJECTILE.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+    }
+
+    /**
+     * 菜单界面注册：把 MenuType 绑到对应的 Screen。
+     *
+     * <p><b>目前没有菜单</b> —— 唯一的菜单（发酵木桶）已暂时移除。
+     * 以后加 GUI 时在这里写
+     * {@code event.register(ModMenus.XXX.get(), XxxScreen::new);}。</p>
+     */
+    private static void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        // 暂无菜单
     }
 
     private static void onClientSetup(final FMLClientSetupEvent event) {
@@ -128,6 +145,14 @@ public final class FoodIndustryClient {
     private static void registerItemColors(RegisterColorHandlersEvent.Item event) {
         for (ModFluids.MilkLike milkLike : ModFluids.allMilkLike()) {
             if (milkLike.bottle() == null || !(milkLike.bottle().get() instanceof DrinkableBottleItem)) {
+                continue;
+            }
+            // ⚠️ 有自己专用贴图的瓶子（果汁/咖啡/酱油）**跳过染色**。
+            //    它们已改用 item/generated + 用户画好的成品图，贴图里颜色是**画上去的**；
+            //    再叠一层染色会把颜色乘歪（而且药水模型的 layer0 液体层也不存在了）。
+            //    没有专用贴图的瓶子（豆浆、山羊奶）仍走"药水模型 + 染色"。
+            if (dev.rhaaaaaast1.foodindustry.data.ModItemModelProvider.HAS_OWN_TEXTURE
+                    .contains(milkLike.name())) {
                 continue;
             }
             final int tint = tintOf(milkLike.name());

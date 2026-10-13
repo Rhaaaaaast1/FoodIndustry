@@ -3,6 +3,7 @@ package dev.rhaaaaaast1.foodindustry.data;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.RegrowingCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.RopeCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.RopeVineBlock;
+import dev.rhaaaaaast1.foodindustry.common.block.crop.SeedCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.TallFlowerCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModBlocks;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModItems;
@@ -56,12 +57,16 @@ public class ModBlockLootTables extends BlockLootSubProvider {
     @Override
     protected void generate() {
         // ---------------- 普通作物 ----------------
-        // 玉米：成熟只掉**玉米棒**，不掉玉米粒（玉米粒靠砧板切玉米棒、以及野生玉米获得），
-        // 但玉米棒本身按原版胡萝卜那样多给一份池（成熟 2~5 根）
-        cropWithCobOnly(ModBlocks.CORN.get(), CropBlock.AGE, CropBlock.MAX_AGE,
+        // 玉米：成熟掉**玉米棒 + 玉米粒**（按需求从"只给玉米棒"改回来）；
+        // 生长逻辑就是原版作物那套（8 阶，age 0..7）
+        cropWithCobAndKernels(ModBlocks.CORN.get(), SeedCropBlock.AGE, SeedCropBlock.MAX_AGE,
                 ModItems.CORN.get(), ModItems.CORN_KERNELS.get());
-        // 辣椒：可反复右键采摘；挖掉植株时按普通作物给（没熟还 1 颗种子，成熟 1 个辣椒 + 1~4 颗种子）
-        crop(ModBlocks.CHILI.get(), RegrowingCropBlock.AGE, ModItems.CHILI_PEPPER.get(), ModItems.CHILI_SEEDS.get());
+        // 辣椒：**一次性的原版作物**（成熟后整株挖掉）—— 原版小麦式两池掉落：
+        // 池1 满熟给辣椒、没熟还你 1 颗辣椒种子；池2 满熟再给 1~4 颗种子（带时运）。
+        // 所以成熟挖掉 = 辣椒 ×1 + 辣椒种子 ×1~4 ✓
+        crop(ModBlocks.CHILI.get(), CropBlock.AGE, ModItems.CHILI_PEPPER.get(), ModItems.CHILI_SEEDS.get());
+        // 茄子：与辣椒**完全同一套规则**（原版 8 阶一次性作物）
+        crop(ModBlocks.EGGPLANT.get(), CropBlock.AGE, ModItems.EGGPLANT.get(), ModItems.EGGPLANT_SEEDS.get());
         // 花生与大豆的产物就是种子：按**原版胡萝卜/马铃薯**的掉落（未成熟还 1 个，成熟 2~5 个）
         matureCropLikeCarrot(ModBlocks.PEANUT.get(), CropBlock.AGE, CropBlock.MAX_AGE, ModItems.PEANUTS.get());
         matureCropLikeCarrot(ModBlocks.SOYBEAN.get(), CropBlock.AGE, CropBlock.MAX_AGE, ModItems.SOYBEANS.get());
@@ -108,17 +113,28 @@ public class ModBlockLootTables extends BlockLootSubProvider {
         // 特例：野生茶树同时掉茶籽（必定）与茶叶（20%）
         add(ModBlocks.WILD_TEA.get(), block -> wildDropsWithSeeds(block, ModItems.TEA_LEAVES.get(), ModItems.TEA_SEEDS.get()));
 
+        // ---------------- 发酵木桶 ----------------
+        // （暂时移除；恢复时加回 dropSelf(ModBlocks.FERMENTATION_BARREL.get())，
+        //   槽里的物品要靠 FermentationBarrelBlock#onRemove 另外掉落，不走战利品表）
+
         // ---------------- 蛋糕（14 种）----------------
-        // 同原版蛋糕：破坏时掉回自己；切片只能靠"吃"或"用刀切"得到。
+        // **什么都不掉**，对齐原版：VanillaBlockLoot 里就是 this.add(Blocks.CAKE, noDrop())。
+        // 农夫乐事的派也一样（FDBlockLoot 给三个派写的都是空表 LootTable.lootTable()）。
+        //
+        // ⚠️ 这里原来写的是 dropSelf(...)，那是个**可以白嫖的漏洞**：
+        //    把蛋糕放在沙子上、吃两口、再把下面的沙子挖掉 —— 蛋糕因失去支撑而消失，
+        //    却按 dropSelf 掉回一个**完整**蛋糕，等于无限刷（玩家实测发现）。
+        //    noDrop() 之后任何状态（吃过几口、被刀切过）破坏/失去支撑都掉不出东西，漏洞闭合。
         // 必须在这里生成 —— src/generated/resources 是 datagen 的输出目录，
         // 手写进去的文件下一次 runData 会被当陈旧文件删掉（removed stale: N）。
         for (var cake : dev.rhaaaaaast1.foodindustry.common.registry.ModPastries.CAKES.values()) {
-            dropSelf(cake.get());
+            add(cake.get(), noDrop());
         }
 
         // ---------------- 派（8 种）----------------
+        // 同上（农夫乐事的 PieBlock 本身就是这个规则）。
         for (var pie : dev.rhaaaaaast1.foodindustry.common.registry.ModPastries.PIES.values()) {
-            dropSelf(pie.get());
+            add(pie.get(), noDrop());
         }
     }
 
@@ -126,9 +142,17 @@ public class ModBlockLootTables extends BlockLootSubProvider {
     //  掉落规则
     // ==================================================================
 
-    /** 作物掉落：只有长到最大 age 才掉产物，种子则始终会掉（含时运）。 */
+    /**
+     * 作物掉落：只有长到最大 age 才掉产物，种子则始终会掉（含时运）。
+     *
+     * <p><b>成熟阈值必须从 {@code ageProperty} 自己算，不能写死 {@code CropBlock.MAX_AGE}</b> ✗：
+     * 写死就会把自定义阶数的作物生成成"age=7"这个**永远不可能满足**的条件 ✗，
+     * 结果是成熟挖掉只掉种子、不掉产物 ✗。（这个 bug 真出现过，辣椒当时用 {@code AGE_7}
+     * 恰好等于 7 才一直没暴露。）</p>
+     */
     private void crop(Block block, IntegerProperty ageProperty, Item produce, Item seeds) {
-        add(block, createCropDrops(block, produce, seeds, matureCondition(block, ageProperty, CropBlock.MAX_AGE)));
+        int maxAge = ageProperty.getPossibleValues().stream().max(Integer::compareTo).orElse(0);
+        add(block, createCropDrops(block, produce, seeds, matureCondition(block, ageProperty, maxAge)));
     }
 
     /**
@@ -146,33 +170,42 @@ public class ModBlockLootTables extends BlockLootSubProvider {
     }
 
     /**
-     * 玉米这种"成熟只给玉米棒、**不给玉米粒**"的作物。
+     * 玉米：**成熟掉玉米棒 + 玉米粒**的掉落表。
      *
-     * <p>为什么要专门写一个：玉米粒是独立的种植物品，但如果作物成熟后直接掉玉米粒，
-     * 就**绕过了砧板**（砧板切玉米棒才是设计上的取粒方式）✗。所以这里：</p>
+     * <p>需求确认前的旧行为是"成熟只给玉米棒、玉米粒只能靠砧板切" ✗，现已改回：</p>
      * <ul>
-     *   <li>成熟 → 只掉**玉米棒** ✓（而且按原版胡萝卜多给一份池：成熟 2~5 根 ✓）；</li>
-     *   <li>没长熟 → 还你 **1 颗玉米粒** ✓（原版"未成熟还种子"的行为，避免亏掉种子 ✓）。</li>
+     *   <li>池1：**玉米粒**，没有 age 条件（原版"未成熟还种子"的行为 —— 没长熟挖掉还你
+     *       1 颗玉米粒，不会白亏种子 ✓）；</li>
+     *   <li>池2：**玉米粒** 且**只在成熟时** + 时运二项加成（{@code extra 3 / p 0.5714286}，
+     *       跟原版小麦同款公式）→ 成熟共 **2~5 颗** ✓；</li>
+     *   <li>池3：**玉米棒** ×1，只在成熟时 ✓。</li>
      * </ul>
-     * <p>玉米粒的正式来源：**砧板切玉米棒**（1 根 → 32 颗）与**野生玉米**掉落 ✓。</p>
+     * <p>所以成熟挖掉一棵玉米 = 玉米棒 ×1 + 玉米粒 ×2~5 ✓。玉米粒另有"砧板切玉米棒"
+     * 与"野生玉米掉落"两个来源。</p>
      */
-    private void cropWithCobOnly(Block block, IntegerProperty ageProperty, int maxAge, Item cob, Item kernels) {
+    private void cropWithCobAndKernels(Block block, IntegerProperty ageProperty, int maxAge,
+                                       Item cob, Item kernels) {
         LootItemCondition.Builder mature = matureCondition(block, ageProperty, maxAge);
         add(block, LootTable.lootTable()
-                // 池1：成熟掉玉米棒；没熟还 1 颗玉米粒
+                // 池1：玉米粒必定掉 1 颗（未成熟时就是"还你种子"）
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
-                        .add(AlternativesEntry.alternatives(
-                                LootItem.lootTableItem(cob).when(mature),
-                                LootItem.lootTableItem(kernels))))
-                // 池2：胡萝卜式的额外一份玉米棒（成熟 + 时运二项加成，原版同款公式）
+                        .add(LootItem.lootTableItem(kernels)
+                                .apply(ApplyExplosionDecay.explosionDecay())))
+                // 池2：成熟再多掉一份玉米粒（时运二项加成，原版小麦同款公式）
+                .withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(mature)
+                        .add(LootItem.lootTableItem(kernels)
+                                .apply(ApplyExplosionDecay.explosionDecay())
+                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(
+                                        enchantments().getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))))
+                // 池3：成熟才掉玉米棒
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .when(mature)
                         .add(LootItem.lootTableItem(cob)
-                                .apply(ApplyExplosionDecay.explosionDecay())
-                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(
-                                        enchantments().getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3)))));
+                                .apply(ApplyExplosionDecay.explosionDecay()))));
     }
 
     /**

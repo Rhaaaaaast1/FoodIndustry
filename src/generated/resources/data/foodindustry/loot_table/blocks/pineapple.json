@@ -8,7 +8,7 @@
           "block": "foodindustry:pineapple",
           "condition": "minecraft:block_state_property",
           "properties": {
-            "age": "3"
+            "age": "7"
           }
         }
       ],

@@ -7,7 +7,6 @@ import dev.rhaaaaaast1.foodindustry.common.item.DrinkableBucketItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -94,7 +93,13 @@ public final class ModFluids {
 
     // ---- 酱类：碗装、能拿勺子吃、吃得更慢（64 tick）----
     public static final MilkLike BLUEBERRY_JAM = milkLike("blueberry_jam", Drinkable.THICK, Container.BOWL, food(6, 0.5F));
-    public static final MilkLike CHILI_SAUCE = milkLike("chili_sauce", Drinkable.THICK, Container.BOWL, food(5, 0.4F));
+    /**
+     * 辣酱：**瓶装**（按需求从碗改成瓶，外观也换成了罐装果酱那一族）—— 吃完还玻璃瓶。
+     *
+     * <p>注册名保持 {@code foodindustry:chili_sauce} 不变，所以所有既有配方、标签、染色表、
+     * 语言文件都不需要改。</p>
+     */
+    public static final MilkLike CHILI_SAUCE = milkLike("chili_sauce", Drinkable.THICK, Container.BOTTLE, food(5, 0.4F));
     public static final MilkLike STRAWBERRY_JAM = milkLike("strawberry_jam", Drinkable.THICK, Container.BOWL, food(6, 0.5F));
     public static final MilkLike PINEAPPLE_JAM = milkLike("pineapple_jam", Drinkable.THICK, Container.BOWL, food(6, 0.5F));
     /** 葡萄酱暂时只做一种（汁才分红白）。 */
@@ -103,6 +108,23 @@ public final class ModFluids {
 
     /** 食用油：纯原料，**不能喝**，只有瓶装。 */
     public static final MilkLike COOKING_OIL = milkLike("cooking_oil", Drinkable.NONE, Container.BOTTLE, null);
+
+    /**
+     * 酱油：发酵产物（原由发酵木桶产出；木桶暂时移除后，酱油暂时只能靠创造/命令获得）。
+     *
+     * <p>纯调味原料，**不能直接喝**（{@link Drinkable#NONE}），只有瓶装
+     * （{@code Container.BOTTLE}）—— 瓶装物品的注册名就是 {@code foodindustry:soy_sauce}。</p>
+     */
+    public static final MilkLike SOY_SAUCE = milkLike("soy_sauce", Drinkable.NONE, Container.BOTTLE, null);
+
+    /**
+     * 醋：与酱油并列的另一味发酵调味原料。
+     *
+     * <p>纯调味原料，**不能直接喝**（{@link Drinkable#NONE}），只有瓶装
+     * （{@code Container.BOTTLE}）—— 瓶装物品的注册名就是 {@code foodindustry:vinegar}，
+     * 贴图用酱油瓶换色（见 {@code ModItemModelProvider}）。</p>
+     */
+    public static final MilkLike VINEGAR = milkLike("vinegar", Drinkable.NONE, Container.BOTTLE, null);
 
     // ==================================================================
     //  注册

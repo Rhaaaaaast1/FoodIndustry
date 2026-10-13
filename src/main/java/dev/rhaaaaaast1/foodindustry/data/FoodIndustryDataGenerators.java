@@ -62,8 +62,21 @@ public final class FoodIndustryDataGenerators {
                 new ModItemTagsProvider(output, lookupProvider, blockTags.contentsGetter(), existingFileHelper));
 
         generator.addProvider(event.includeServer(), new LootTableProvider(output, Set.of(),
-                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTables::new, LootContextParamSets.BLOCK)),
+                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootTables::new, LootContextParamSets.BLOCK),
+                        // 注入到原版结构箱子里的子表（内容）—— 参数集用 CHEST，
+                        // 与农夫乐事的 FDChestLoot 一致
+                        new LootTableProvider.SubProviderEntry(ModChestLoot::new, LootContextParamSets.CHEST),
+                        // 实体掉落表（目前只有海龟）
+                        new LootTableProvider.SubProviderEntry(ModEntityLootTables::new,
+                                LootContextParamSets.ENTITY)),
                 lookupProvider));
+
+        // 全局战利品修改器：把上面那些子表挂到原版箱子上
+        // （生成 data/foodindustry/loot_modifiers/*.json 与 data/neoforge/loot_modifiers/global_loot_modifiers.json）
+        generator.addProvider(event.includeServer(), new ModGlobalLootModifiers(output, lookupProvider));
+
+        // 原版/NeoForge 数据表：堆肥几率（data/neoforge/data_maps/item/compostables.json）
+        generator.addProvider(event.includeServer(), new ModDataMaps(output, lookupProvider));
 
         FoodIndustry.LOGGER.debug("[{}] 数据生成器已注册", FoodIndustry.MODID);
     }

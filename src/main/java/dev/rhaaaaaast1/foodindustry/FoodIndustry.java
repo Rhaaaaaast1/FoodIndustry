@@ -6,6 +6,7 @@ import dev.rhaaaaaast1.foodindustry.common.CommonSetup;
 import dev.rhaaaaaast1.foodindustry.common.Config;
 import dev.rhaaaaaast1.foodindustry.common.event.GoatMilkingHandler;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModBlocks;
+import dev.rhaaaaaast1.foodindustry.common.registry.ModBlockEntities;
 
 import dev.rhaaaaaast1.foodindustry.common.registry.ModCapabilities;
 
@@ -14,7 +15,9 @@ import dev.rhaaaaaast1.foodindustry.common.registry.ModEffects;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModEntities;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModFluids;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModItems;
+import dev.rhaaaaaast1.foodindustry.common.registry.ModMenus;
 import dev.rhaaaaaast1.foodindustry.common.registry.ModPastries;
+import dev.rhaaaaaast1.foodindustry.common.registry.ModRecipes;
 import dev.rhaaaaaast1.foodindustry.data.FoodIndustryDataGenerators;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -50,6 +53,8 @@ public class FoodIndustry {
         GoatMilkingHandler.register();
         // 动物定期产粪便
         dev.rhaaaaaast1.foodindustry.common.event.ManureHandler.register();
+        // 原版农民的收购 / 流浪商人的种子交易
+        dev.rhaaaaaast1.foodindustry.common.event.VillagerTradesHandler.register();
 
         // 客户端专属的初始化全部关在 client 包里，专用服务器不会加载那个类
         if (FMLEnvironment.dist.isClient()) {
@@ -61,6 +66,7 @@ public class FoodIndustry {
 
         // 所有注册表统一在这里挂到 mod 事件总线
         ModBlocks.BLOCKS.register(modEventBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         // 糕点线（14 蛋糕 + 8 派）：先 bootstrap 触发静态初始化
         // （它内部会往 ModItems 注册切片与方块物品），再挂方块注册表
         ModPastries.bootstrap();
@@ -69,8 +75,13 @@ public class FoodIndustry {
         ModFluids.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
+        // 菜单（GUI）：目前没有菜单，注册表留着备用
+        ModMenus.MENUS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
         ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
+        // 配方系统（RecipeType + RecipeSerializer）：和上面几个注册表没有先后依赖，
+        // 配方只是"数据 + 读写器"，放在最后不影响任何既有注册顺序。
+        ModRecipes.register(modEventBus);
     }
 
     /** 拼本模组命名空间下的 ResourceLocation。 */

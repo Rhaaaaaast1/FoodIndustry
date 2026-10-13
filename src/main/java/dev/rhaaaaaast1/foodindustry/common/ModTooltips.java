@@ -7,7 +7,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,11 +57,6 @@ public final class ModTooltips {
     /** 这件物品登记过的全部提示行；没有就返回空表。 */
     public static List<Component> linesFor(Item item) {
         return LINES.getOrDefault(item, List.of());
-    }
-
-    /** 登记表只读视图（诊断用）。 */
-    public static Map<Item, List<Component>> registered() {
-        return Collections.unmodifiableMap(LINES);
     }
 
     /**

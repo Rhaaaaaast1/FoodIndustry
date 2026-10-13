@@ -7,7 +7,6 @@ import dev.rhaaaaaast1.foodindustry.common.block.crop.RopeCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.RopeVineBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.SeedCropBlock;
 import dev.rhaaaaaast1.foodindustry.common.block.crop.TallFlowerCropBlock;
-import dev.rhaaaaaast1.foodindustry.common.tag.ModTags;
 import net.minecraft.core.Holder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
@@ -33,10 +32,14 @@ import java.util.function.Supplier;
  *
  * <p>作物按**生长行为**分三组，每组共用一个方块类，差异只用构造参数表达：</p>
  * <ul>
- *   <li>普通作物 → {@link SeedCropBlock}（玉米、花生、辣椒、草莓、菠萝、大豆）</li>
+ *   <li>普通作物 → {@link SeedCropBlock} —— **生长速度与阶段数完全等同原版小麦**
+ *       （8 阶，{@code age 0..7}，最高阶 7 判定成熟）。玉米、花生、辣椒、大豆、草莓都用它。</li>
  *   <li>攀藤作物 → {@link RopeCropBlock}（底部作物）+ {@link RopeVineBlock}（沿绳子长的藤）
  *       —— 黄瓜、白葡萄、红葡萄</li>
- *   <li>灌木 → {@link BerryBushBlock}（甜浆果式生长）—— 茶、咖啡、蓝莓</li>
+ *   <li>灌木 → {@link BerryBushBlock}（原版甜浆果式生长，8 阶，可反复采摘）
+ *       —— 茶、咖啡、蓝莓</li>
+ *   <li>菠萝 → {@link RegrowingCropBlock}（8 阶，成熟右键摘果、植株保留、退一阶重长）</li>
+ *   <li>向日葵 → {@link TallFlowerCropBlock}（8 阶，高位花）</li>
  * </ul>
  *
  * <p>野生作物直接复用 Farmer's Delight 的 {@link WildCropBlock} —— 掉落规则、生长判定、
@@ -50,44 +53,56 @@ public final class ModBlocks {
     //  土壤谓词与外部引用（必须声明在使用它们的方块之前：Java 不允许静态字段前向引用）
     // ==================================================================
     /**
-     * 普通土壤（茶、蓝莓）：泥土类 + **任何 {@code FarmBlock}**。
+     * 灌木（茶、蓝莓、草莓、咖啡）的土壤：泥土类 + **任何 {@code FarmBlock}**。
      *
      * <p>用 {@code instanceof FarmBlock} 而不是 {@code state.is(Blocks.FARMLAND)} 很关键：
      * 原版 {@code CropBlock.mayPlaceOn} 就是这么写的，因此它同时接受原版耕地、
      * **Farmer's Delight 的沃土农田**、以及别的模组自定义的耕地。</p>
+     *
+     * <p><b>咖啡曾经有自己的土壤标签</b>（{@code foodindustry:coffee_soil}，只认灰化土 + 各家
+     * 沃土），按需求已删除 —— 现在四种灌木共用这一个谓词，没有例外 ✓。</p>
      */
     private static final Predicate<BlockState> DIRT_SOIL =
             state -> state.is(BlockTags.DIRT) || state.getBlock() instanceof FarmBlock;
-
-    /**
-     * 咖啡的土壤：**灰化土 + 各家乐事的沃土** —— 走我们自己的标签
-     * {@code foodindustry:coffee_soil}（数据驱动，清单见 {@code ModBlockTagsProvider}）。
-     */
-    private static final Predicate<BlockState> COFFEE_SOIL = state -> state.is(ModTags.Blocks.COFFEE_SOIL);
 
     /** Farmer's Delight 的绳子：藤被破坏/失去支撑时还原成它。 */
     private static final Supplier<Block> FD_ROPE =
             () -> vectorwing.farmersdelight.common.registry.ModBlocks.ROPE.get();
 
     // ==================================================================
-    //  普通作物（6）
+    //  普通作物（7）
     // ==================================================================
     public static final DeferredBlock<SeedCropBlock> CORN = seedCrop("corn", () -> ModItems.CORN_KERNELS.get());
     public static final DeferredBlock<SeedCropBlock> PEANUT = seedCrop("peanut", () -> ModItems.PEANUTS.get());
     /**
-     * 辣椒：成熟后**右键采摘**，植株保留并继续结果（和菠萝同一套 {@link RegrowingCropBlock}）。
-     * 采摘只退一阶，所以看上去不会缩回小苗。
+     * 辣椒：**原版作物**（同一套 {@link SeedCropBlock}）—— 种在耕地上（原版
+     * {@code CropBlock.mayPlaceOn} 的耕地判定），成熟后**整株挖掉**，
+     * 掉辣椒 + 辣椒种子（掉落规则见 {@code ModBlockLootTables}）。
+     *
+     * <p>曾经做过"可反复右键采摘"（{@link RegrowingCropBlock}），但按需求改回了原版作物 ✓。
+     * 现在**没有右键采摘**这个交互 —— 成熟了就直接挖 ✓。</p>
      */
-    public static final DeferredBlock<RegrowingCropBlock> CHILI =
-            BLOCKS.registerBlock("chili",
-                    props -> new RegrowingCropBlock(props, () -> ModItems.CHILI_SEEDS.get(),
-                            () -> ModItems.CHILI_PEPPER.get(), 1, 2),
-                    cropProperties());
+    public static final DeferredBlock<SeedCropBlock> CHILI =
+            seedCrop("chili", () -> ModItems.CHILI_SEEDS.get());
+    /**
+     * 茄子：与{@link #CHILI 辣椒}**完全同一套规则** —— 原版 8 阶 {@link SeedCropBlock}、
+     * 种在耕地上、成熟整株挖掉，掉茄子 + 茄子种子。
+     *
+     * <p>方块贴图由 {@code tools/gen-eggplant.py} 从辣椒素材改色生成
+     * （茎叶原样保留，红色椒果换成紫色茄果）。</p>
+     */
+    public static final DeferredBlock<SeedCropBlock> EGGPLANT =
+            seedCrop("eggplant", () -> ModItems.EGGPLANT_SEEDS.get());
     /** 草莓：和蓝莓一样的**树丛**（右键收获、果实会再生），不再做成普通作物。 */
     public static final DeferredBlock<BerryBushBlock> STRAWBERRY_BUSH =
             berryBush("strawberry_bush", () -> ModItems.STRAWBERRIES.get(), DIRT_SOIL);
     public static final DeferredBlock<SeedCropBlock> SOYBEAN = seedCrop("soybean", () -> ModItems.SOYBEANS.get());
-    /** 菠萝：可反复收获（右键摘果，植株保留），所以用 {@link RegrowingCropBlock}。 */
+    /**
+     * 菠萝：可反复收获（右键摘果，植株保留），所以用 {@link RegrowingCropBlock}。
+     *
+     * <p>注意与{@link #CHILI 辣椒}的区别 ✓：辣椒是**一次性的原版作物**
+     * （成熟后整株挖掉，掉辣椒 + 辣椒种子），菠萝是**可反复采摘**的 ✓。</p>
+     */
     public static final DeferredBlock<RegrowingCropBlock> PINEAPPLE =
             BLOCKS.registerBlock("pineapple",
                     props -> new RegrowingCropBlock(props, () -> ModItems.PINEAPPLE_CROWN.get(),
@@ -129,15 +144,15 @@ public final class ModBlocks {
                     () -> ModBlocks.RED_GRAPE.get());
 
     // ==================================================================
-    //  灌木（3）：甜浆果式生长
+    //  灌木（4）：甜浆果式生长，可反复采摘
     // ==================================================================
     public static final DeferredBlock<BerryBushBlock> TEA_BUSH =
             berryBush("tea_bush", () -> ModItems.TEA_LEAVES.get(), DIRT_SOIL);
     public static final DeferredBlock<BerryBushBlock> BLUEBERRY_BUSH =
             berryBush("blueberry_bush", () -> ModItems.BLUEBERRIES.get(), DIRT_SOIL);
-    /** 咖啡：只能种在灰化土或各家乐事的沃土上（见 {@link #COFFEE_SOIL}）；收获物是咖啡果。 */
+    /** 咖啡：土壤现在与另外三种灌木相同（原先的"只认灰化土"特权已删除）；收获物是咖啡果。 */
     public static final DeferredBlock<BerryBushBlock> COFFEE_BUSH =
-            berryBush("coffee_bush", () -> ModItems.COFFEE_CHERRIES.get(), COFFEE_SOIL);
+            berryBush("coffee_bush", () -> ModItems.COFFEE_CHERRIES.get(), DIRT_SOIL);
 
     // ==================================================================
     //  野生作物（12）—— 复用 Farmer's Delight 的 WildCropBlock
@@ -212,6 +227,15 @@ public final class ModBlocks {
                 .pushReaction(PushReaction.DESTROY)
                 .noOcclusion();
     }
+
+    // ==================================================================
+    //  发酵木桶
+    // ==================================================================
+
+    // ⚠️ 发酵木桶（fermentation_barrel）已**暂时移除**，源码备份在
+    //    E:\dev\foodindustry-tools\barrel-backup\（含方块/方块实体/菜单/界面/配方/JEI 集成）。
+    //    恢复时把这些文件放回来，并还原 ModBlockEntities / ModMenus / ModItems /
+    //    ModRecipes / FoodIndustryClient / data 各处对它的注册与数据生成。
 
     private ModBlocks() {
     }

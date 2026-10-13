@@ -29,28 +29,10 @@ public final class ModTags {
         /** 原版作物方块标签，方便别的模组按统一规则识别。 */
         public static final TagKey<Block> CROPS = vanilla("crops");
 
-        /**
-         * 咖啡能种在上面的土壤 —— **本模组自己的标签**。
-         *
-         * <p>内容 = 灰化土 + 各家 Farmer's Delight 系模组的"沃土"，清单在
-         * {@code ModBlockTagsProvider} 里生成，外来方块一律以 {@code required=false} 写入，
-         * 所以没装对应模组时不会导致数据包加载失败。</p>
-         *
-         * <p>为什么不用现成的标签：整合包里扫过一遍，**不存在**能涵盖各家沃土的公共标签；
-         * 而 {@code #minecraft:dirt} 里还混着普通泥土/草方块/菌丝，拿它当条件会让咖啡长在普通泥土上。
-         * 所以按生态惯例（CollectorsReap、youkaisfeasts 都这么做）自建一个标签，
-         * 整合包或玩家可以用数据包继续往里加土壤。</p>
-         */
-        public static final TagKey<Block> COFFEE_SOIL = mod("coffee_soil");
-
         /** Farmer's Delight 的野生作物标签（方块）：把我们的野生作物挂进去，别的模组就能统一识别。 */
         public static final TagKey<Block> WILD_CROPS = farmersDelight("wild_crops");
 
         private Blocks() {
-        }
-
-        private static TagKey<Block> mod(String path) {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath(FoodIndustry.MODID, path));
         }
 
         private static TagKey<Block> farmersDelight(String path) {
@@ -115,6 +97,7 @@ public final class ModTags {
         private Items() {
         }
 
+        /** 通用物品标签：{@code c:<path>}。 */
         private static TagKey<Item> common(String path) {
             return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", path));
         }
@@ -145,6 +128,19 @@ public final class ModTags {
     }
 
     public static final class Fluids {
+
+        /**
+         * 通用水标签 {@code c:water}：发酵配方用它当"水"这一项。
+         *
+         * <p>NeoForge 自带这个标签（它 jar 里的 {@code data/c/tags/fluid/water.json} 内容 =
+         * {@code minecraft:water} + {@code minecraft:flowing_water}），所以**不需要**本模组再生成
+         * 一份；这里按本文件的惯例自己声明常量，而不是引用 {@code net.neoforged.neoforge.common.Tags}
+         * —— 和 {@link #MILK} 一样，避免将来 NeoForge 改名/挪位置时我们的代码跟着编译不过。</p>
+         *
+         * <p>用标签而不是硬写 {@code minecraft:water}：整合包里若有别的模组也提供"水"
+         * （或把它的水流体挂进 {@code #c:water}），配方不用改就能匹配上。</p>
+         */
+        public static final TagKey<Fluid> WATER = common("water");
 
         /** 通用牛奶标签 {@code c:milk}：山羊奶也放进去，别的模组按"牛奶"取用时能接受它。 */
         public static final TagKey<Fluid> MILK = common("milk");

@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -34,10 +35,10 @@ import java.util.function.Supplier;
  *   <li>成熟后右键收获产物，并重置到 0 重新结果。</li>
  * </ul>
  */
-public class RopeVineBlock extends FourStageCropBlock {
+public class RopeVineBlock extends SeedCropBlock {
 
-    /** 藤的生长阶（同 {@link FourStageCropBlock#AGE}）。 */
-    public static final IntegerProperty VINE_AGE = AGE;
+    /** 藤的生长阶 —— **就是原版的 {@code CropBlock.AGE}（{@code AGE_7}，0..7）**。 */
+    public static final IntegerProperty VINE_AGE = CropBlock.AGE;
 
     private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 
@@ -142,7 +143,7 @@ public class RopeVineBlock extends FourStageCropBlock {
                                                BlockHitResult hitResult) {
         if (this.isMaxAge(state)) {
             // 统一走 CropHarvest：1~2 个产物；**只回退一阶**（不缩回小苗）
-            return CropHarvest.pick(level, pos, state, VINE_AGE, MAX_AGE - 1,
+            return CropHarvest.pick(level, pos, state, VINE_AGE, CropBlock.MAX_AGE - 1,
                     this.produce.get(), 1, 2);
         }
         return super.useWithoutItem(state, level, pos, player, hitResult);

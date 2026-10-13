@@ -47,9 +47,6 @@ public final class ModEntities {
      */
     public static class ManureProjectile extends ThrowableItemProjectile {
 
-        /** 反胃时长：10 秒 = 200 tick。 */
-        public static final int NAUSEA_TICKS = 200;
-
         public ManureProjectile(EntityType<? extends ManureProjectile> entityType, Level level) {
             super(entityType, level);
         }

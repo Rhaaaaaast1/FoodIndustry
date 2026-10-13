@@ -20,9 +20,9 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
@@ -34,12 +34,17 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * 甜浆果式灌木（茶、咖啡、蓝莓）。
+ * 甜浆果式灌木（茶、咖啡、蓝莓、草莓）。
  *
- * <p>生长方式与原版 {@code SweetBerryBushBlock} 一致：{@code AGE} 0..3、上方亮度 ≥ 9 时
- * 以 1/5 概率长一阶、右键收获（age &gt; 1 即可收，满熟多给一个）并**重置到 age 1**、
- * 骨粉 +1。与原版唯一的差别：**没有"走过去被扎"的减速与伤害**（茶/咖啡丛不该扎人），
+ * <p>生长方式与原版 {@code SweetBerryBushBlock} 一致：上方亮度 ≥ 9 时以 1/5 概率长一阶、
+ * 右键收获并**重置到一个较低的阶**（植株保留、继续结果）、骨粉 +1。
+ * 与原版唯一的差别：**没有"走过去被扎"的减速与伤害**（茶/咖啡丛不该扎人），
  * 若要还原原版行为，补一个 {@code entityInside} 覆写即可。</p>
+ *
+ * <p><b>阶数与原版的差别</b>：原版甜浆果丛是 {@code AGE_3}（4 阶），我们统一用
+ * **原版作物的 {@code AGE_7}（8 阶）** ✓，所以单阶耗时不变而成熟路径更长
+ * ——满熟约需原版作物 8 阶的时间。收获门槛与重置阶都按 {@link #MAX_AGE} 同比推导，
+ * 维持"约 57% 长成即可收、收后退回约 29%"的手感 ✓。</p>
  *
  * <p>差异全部走构造参数：产物物品 + **土壤谓词**。咖啡只需传"只能种在灰化土"的谓词，
  * 不需要额外开子类。</p>
@@ -49,8 +54,14 @@ public class BerryBushBlock extends BushBlock implements BonemealableBlock {
     /** codec 用。正常注册的方块都走带参数的构造器，见下方说明。 */
     public static final MapCodec<BerryBushBlock> CODEC = simpleCodec(BerryBushBlock::new);
 
-    public static final int MAX_AGE = 3;
-    public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+    public static final int MAX_AGE = 7;
+    /** 与原版作物同一套属性（{@code AGE_7}，取值 0..7）。 */
+    public static final IntegerProperty AGE = CropBlock.AGE;
+
+    /** 能采摘的最低阶。8 阶里取 4（约 57% 长成，视角上已经是"结果中的灌木"）。 */
+    private static final int MIN_PICK_AGE = 4;
+    /** 采摘后重置到的阶。取 4 而不是更低的值，是为了采摘后**不缩回小苗形态**（贴图档 2）。 */
+    private static final int RESET_AGE = 4;
 
     private static final VoxelShape SAPLING_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 8.0, 13.0);
     private static final VoxelShape MID_GROWTH_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
@@ -127,13 +138,13 @@ public class BerryBushBlock extends BushBlock implements BonemealableBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hitResult) {
         int age = state.getValue(AGE);
-        if (age > 1) {
+        if (age > MIN_PICK_AGE) {
             boolean mature = age == MAX_AGE;
             int count = 1 + level.random.nextInt(2) + (mature ? 1 : 0);
             popResource(level, pos, new ItemStack(fruit.get(), count));
             level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS,
                     1.0F, 0.8F + level.random.nextFloat() * 0.4F);
-            BlockState harvested = state.setValue(AGE, 1);
+            BlockState harvested = state.setValue(AGE, RESET_AGE);
             level.setBlock(pos, harvested, 2);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, harvested));
             return InteractionResult.sidedSuccess(level.isClientSide);

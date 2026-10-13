@@ -23,3 +23,7 @@ run
 # Minecraft DataGenerator 的增量缓存（src/generated/resources/.cache）：
 # 只是"哪些生成文件没变"的清单，不该进版本库，也不该进发布 jar（jar 里已由 build.gradle 排除）
 .cache/
+
+# 贴图迭代的中间产物（早期用 PowerShell/System.Drawing 画贴图的 v1..v4 放大图与预览图）。
+# 最终贴图已经落在 src/main/resources/assets/foodindustry/textures/ 下，这里只是过程文件。
+output/

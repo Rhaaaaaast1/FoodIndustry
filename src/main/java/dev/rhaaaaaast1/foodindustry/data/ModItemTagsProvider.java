@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.SEEDS).add(
                 ModItems.CORN_KERNELS.get(),
                 ModItems.CHILI_SEEDS.get(),
+                ModItems.EGGPLANT_SEEDS.get(),
                 ModItems.STRAWBERRY_SEEDS.get(),
                 ModItems.CUCUMBER_SEEDS.get(),
                 ModItems.WHITE_GRAPE_SEEDS.get(),
@@ -51,6 +53,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.seed("corn")).add(ModItems.CORN_KERNELS.get());
         tag(ModTags.Items.seed("peanut")).add(ModItems.PEANUTS.get());
         tag(ModTags.Items.seed("chili")).add(ModItems.CHILI_SEEDS.get());
+        tag(ModTags.Items.seed("eggplant")).add(ModItems.EGGPLANT_SEEDS.get());
         tag(ModTags.Items.seed("strawberry")).add(ModItems.STRAWBERRY_SEEDS.get());
         tag(ModTags.Items.seed("pineapple")).add(ModItems.PINEAPPLE_CROWN.get(), ModItems.PINEAPPLE_SAPLING.get());
         tag(ModTags.Items.seed("soybean")).add(ModItems.SOYBEANS.get());
@@ -62,11 +65,44 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.seed("sunflower")).add(ModItems.SUNFLOWER_SEEDS.get());
         tag(ModTags.Items.seed("coffee")).add(ModItems.RAW_COFFEE_BEANS.get());
 
+        // ---------------- 村民能种的种子 ----------------
+        // 原版这条标签管两件事：
+        //   1. 农民**捡不捡**地上的种子（Villager.java 的 isFarmerDesiredSeed，NeoForge 补丁）；
+        //   2. 农民到了空耕地时**种什么**（HarvestFarmland.java:118 检查 itemstack.is(VILLAGER_PLANTABLE_SEEDS)）。
+        // 不给标签的话农民连捡都不捡我们的种子 —— 我们已经注册了"农民收购我们的作物"的交易
+        // （见 common/event/VillagerTradesHandler），不给标签他们会因为手里没种子而干站着。
+        // 农夫乐事对卷心菜/番茄/洋葱做的正是同一件事
+        // （FD 的 data/minecraft/tags/item/villager_plantable_seeds.json 就三行）。
+        //
+        // 一个已知的**原版限制**：HarvestFarmland 只认 `block instanceof CropBlock`
+        // （HarvestFarmland.java:85 / :108 / :150），所以我们的
+        // BerryBushBlock（蓝莓/茶/草莓）和 RopeCropBlock（黄瓜/葡萄）**农民不会去收**，
+        // 种下去就长在那儿不管了。下面这几样只有确实是 CropBlock 的才会被农民打理：
+        // 玉米粒、辣椒、茄子、花生、大豆、生咖啡豆、菠萝头/苗、葵花籽、黄瓜种子、葡萄种子。
+        tag(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS).add(
+                ModItems.CHILI_SEEDS.get(),
+                ModItems.EGGPLANT_SEEDS.get(),
+                ModItems.STRAWBERRY_SEEDS.get(),
+                ModItems.CUCUMBER_SEEDS.get(),
+                ModItems.WHITE_GRAPE_SEEDS.get(),
+                ModItems.RED_GRAPE_SEEDS.get(),
+                ModItems.BLUEBERRY_SEEDS.get(),
+                ModItems.TEA_SEEDS.get(),
+                ModItems.SUNFLOWER_SEEDS.get(),
+                ModItems.CORN_KERNELS.get(),
+                ModItems.PINEAPPLE_CROWN.get(),
+                ModItems.PINEAPPLE_SAPLING.get(),
+                // 产物即种子
+                ModItems.PEANUTS.get(),
+                ModItems.SOYBEANS.get(),
+                ModItems.RAW_COFFEE_BEANS.get());
+
         // ---------------- 作物产物 ----------------
         tag(ModTags.Items.CROPS).add(
                 ModItems.CORN.get(),
                 ModItems.PEANUTS.get(),
                 ModItems.CHILI_PEPPER.get(),
+                ModItems.EGGPLANT.get(),
                 ModItems.STRAWBERRIES.get(),
                 ModItems.PINEAPPLE.get(),
                 ModItems.SOYBEANS.get(),
@@ -80,6 +116,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.crop("corn")).add(ModItems.CORN.get());
         tag(ModTags.Items.crop("peanut")).add(ModItems.PEANUTS.get());
         tag(ModTags.Items.crop("chili")).add(ModItems.CHILI_PEPPER.get());
+        tag(ModTags.Items.crop("eggplant")).add(ModItems.EGGPLANT.get());
         tag(ModTags.Items.crop("strawberry")).add(ModItems.STRAWBERRIES.get());
         tag(ModTags.Items.crop("pineapple")).add(ModItems.PINEAPPLE.get());
         tag(ModTags.Items.crop("soybean")).add(ModItems.SOYBEANS.get());
@@ -107,6 +144,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 ModItems.CORN.get(),
                 ModItems.PEANUTS.get(),
                 ModItems.CHILI_PEPPER.get(),
+                ModItems.EGGPLANT.get(),
                 ModItems.SOYBEANS.get(),
                 ModItems.CUCUMBER.get());
 
@@ -118,6 +156,13 @@ public class ModItemTagsProvider extends ItemTagsProvider {
             if (milkLike.bowl() != null) {
                 // 碗装的酱算食物
                 tag(ModTags.Items.FOODS).add(milkLike.bowl().get());
+            }
+            // ⚠️ 瓶装里**能吃的**（辣酱改成瓶装后就走这条）也要算食物 ——
+            //    只按"是不是碗"判断会漏掉它。判据用这个物品自己的食物属性，最可靠
+            //    （1.21 里 FoodProperties 挂在 ItemStack 上，Item 本身没有无参 getter）。
+            if (milkLike.bottle() != null
+                    && new ItemStack(milkLike.bottle().get()).getFoodProperties(null) != null) {
+                tag(ModTags.Items.FOODS).add(milkLike.bottle().get());
             }
             if (milkLike.drinkable().isDrink()) {
                 // 汁类 / 豆浆 / 山羊奶算饮品；酱类和食用油不算

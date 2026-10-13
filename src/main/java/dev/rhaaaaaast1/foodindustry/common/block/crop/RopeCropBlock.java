@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -20,17 +21,21 @@ import java.util.function.Supplier;
 /**
  * 攀藤作物的**底部作物**（黄瓜、白葡萄、红葡萄）。
  *
- * <p>行为：种在耕地上，按原版作物规则生长（0..3）。只要上方是 Farmer's Delight 的绳子，
+ * <p>行为：种在耕地上，按**原版作物规则**生长（{@code age 0..7}，与原版小麦/胡萝卜相同）。
+ * 只要上方是 Farmer's Delight 的绳子，
  * 就会把那一格替换成自己的藤方块 {@link RopeVineBlock}，并沿着绳子一节节往上长
  * （最多 {@link RopeChain#MAX_VINE_SEGMENTS} 节）。成熟后右键收获并重置到 0；
  * 不搭绳子也能照常收获，只是产量少。</p>
  *
  * <p>差异全部走构造参数：种子、产物、对应的藤方块。</p>
  */
-public class RopeCropBlock extends FourStageCropBlock {
+public class RopeCropBlock extends SeedCropBlock {
 
-    /** 藤的生长阶（就是 {@link FourStageCropBlock#AGE}，保留这个名字是为了读代码时更直观）。 */
-    public static final IntegerProperty VINE_AGE = AGE;
+    /**
+     * 藤的生长阶 —— **就是原版的 {@code CropBlock.AGE}（{@code AGE_7}，0..7）**。
+     * 保留 {@code VINE_AGE} 这个名字只是因为读起来更直观（"藤的年龄"）。
+     */
+    public static final IntegerProperty VINE_AGE = CropBlock.AGE;
 
     private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 
@@ -84,7 +89,7 @@ public class RopeCropBlock extends FourStageCropBlock {
                                                BlockHitResult hitResult) {
         if (this.isMaxAge(state)) {
             // 统一走 CropHarvest：1~2 个产物；**只回退一阶**（不缩回小苗）
-            return CropHarvest.pick(level, pos, state, VINE_AGE, MAX_AGE - 1,
+            return CropHarvest.pick(level, pos, state, VINE_AGE, CropBlock.MAX_AGE - 1,
                     this.produce.get(), 1, 2);
         }
         return super.useWithoutItem(state, level, pos, player, hitResult);

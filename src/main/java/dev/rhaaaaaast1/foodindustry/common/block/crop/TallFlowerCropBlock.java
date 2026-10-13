@@ -6,7 +6,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -21,14 +20,14 @@ import java.util.function.Supplier;
  *
  * <p>行为：</p>
  * <ul>
- *   <li>age 0..3 正常生长（同 {@link SeedCropBlock}），骨粉只能催熟、**到顶就拒绝**（与原版作物一致 ✓）；</li>
- *   <li>到 age 3 之后再过一个**自然随机刻** → 用 {@link DoublePlantBlock#placeAt} 原地变成目标植物
+ *   <li>age 0..7 正常生长（同 {@link SeedCropBlock}，原版 8 阶），骨粉只能催熟、**到顶就拒绝**（与原版作物一致 ✓）；</li>
+ *   <li>到 age 7（最大阶）之后再过一个**自然随机刻** → 用 {@link DoublePlantBlock#placeAt} 原地变成目标植物
  *       （上下两格一起 ✓）；</li>
  *   <li>**上面没有空间就不开花** ✓（保持成熟状态，等腾出空间再开 ✓）；</li>
  *   <li>因为开花发生在最大 age 之后，所以必须覆盖 {@link #isRandomlyTicking} ✓（见那里的注释 ✓）。</li>
  * </ul>
  */
-public class TallFlowerCropBlock extends FourStageCropBlock {
+public class TallFlowerCropBlock extends SeedCropBlock {
 
     /** 成熟后要变成的原版方块（向日葵）。 */
     private final Supplier<? extends Block> matureBlock;

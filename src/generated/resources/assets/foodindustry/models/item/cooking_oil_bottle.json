@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/potion"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "foodindustry:item/cooking_oil_bottle"
+  }
 }

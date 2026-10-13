@@ -1,0 +1,16 @@
+{
+  "entries": [
+    "foodindustry:add_loot_village_plains_house",
+    "foodindustry:add_loot_village_desert_house",
+    "foodindustry:add_loot_village_savanna_house",
+    "foodindustry:add_loot_village_snowy_house",
+    "foodindustry:add_loot_village_taiga_house",
+    "foodindustry:add_loot_village_butcher",
+    "foodindustry:add_loot_shipwreck_supply",
+    "foodindustry:add_loot_simple_dungeon",
+    "foodindustry:add_loot_abandoned_mineshaft",
+    "foodindustry:add_loot_pillager_outpost",
+    "foodindustry:add_loot_ruined_portal"
+  ],
+  "replace": false
+}

@@ -64,6 +64,8 @@ public final class ModItems {
     //  独立种子（工作台用产物合成）
     // ==================================================================
     public static final DeferredItem<ItemNameBlockItem> CHILI_SEEDS = seed("chili_seeds", () -> ModBlocks.CHILI.get());
+    /** 茄子种子：和辣椒一样在工作台用产物合成（1 个茄子 → 若干种子）。 */
+    public static final DeferredItem<ItemNameBlockItem> EGGPLANT_SEEDS = seed("eggplant_seeds", () -> ModBlocks.EGGPLANT.get());
     public static final DeferredItem<ItemNameBlockItem> STRAWBERRY_SEEDS = seed("strawberry_seeds", () -> ModBlocks.STRAWBERRY_BUSH.get());
     public static final DeferredItem<ItemNameBlockItem> CUCUMBER_SEEDS = seed("cucumber_seeds", () -> ModBlocks.CUCUMBER.get());
     public static final DeferredItem<ItemNameBlockItem> WHITE_GRAPE_SEEDS = seed("white_grape_seeds", () -> ModBlocks.WHITE_GRAPE.get());
@@ -179,6 +181,76 @@ public final class ModItems {
             food("cooked_pufferfish_slice", FoodValues.COOKED_FISH_SLICE);
     /** 河豚毒腺：**不可食用**的材料，用来做剧毒之箭之类。 */
     public static final DeferredItem<Item> PUFFERFISH_POISON_GLAND = plain("pufferfish_poison_gland");
+
+    // ==================================================================
+    //  食材扩充（贴图由用户提供；数值出处见 FoodValues 的注释）
+    // ==================================================================
+
+    // ---- 鱼头：切鱼剩下的部分，不可食用，用来熬高汤/堆肥 ----
+    /** 鳕鱼头。 */
+    public static final DeferredItem<Item> COD_HEAD = plain("cod_head");
+    /** 鲑鱼头。 */
+    public static final DeferredItem<Item> SALMON_HEAD = plain("salmon_head");
+
+    // ---- 蛙腿 / 海龟肉 ----
+    /** 生蛙腿。 */
+    public static final DeferredItem<Item> FROG_LEG = food("frog_leg", FoodValues.RAW_FROG_LEG);
+    /** 熟蛙腿。 */
+    public static final DeferredItem<Item> COOKED_FROG_LEG =
+            food("cooked_frog_leg", FoodValues.COOKED_FROG_LEG);
+    /** 生海龟肉。 */
+    public static final DeferredItem<Item> TURTLE_MEAT = food("turtle_meat", FoodValues.RAW_MEAT);
+    /** 熟海龟肉。 */
+    public static final DeferredItem<Item> COOKED_TURTLE_MEAT =
+            food("cooked_turtle_meat", FoodValues.COOKED_MEAT);
+
+    // ---- 寿司：四种鱼各一种 ----
+    /** 河豚寿司。 */
+    public static final DeferredItem<Item> PUFFERFISH_SUSHI =
+            food("pufferfish_sushi", FoodValues.SUSHI);
+    /** 鱿鱼寿司。 */
+    public static final DeferredItem<Item> SQUID_SUSHI = food("squid_sushi", FoodValues.SUSHI);
+    /** 守卫者寿司。 */
+    public static final DeferredItem<Item> GUARDIAN_SUSHI =
+            food("guardian_sushi", FoodValues.SUSHI);
+    /** 热带鱼寿司。 */
+    public static final DeferredItem<Item> TROPICAL_FISH_SUSHI =
+            food("tropical_fish_sushi", FoodValues.SUSHI);
+
+    // ---- 蔬菜与豆制品 ----
+    /** 茄子（作物产物）。 */
+    public static final DeferredItem<Item> EGGPLANT = food("eggplant", FoodValues.EGGPLANT);
+    /** 黄瓜丝：砧板切黄瓜得到，做凉菜用。 */
+    public static final DeferredItem<Item> CUCUMBER_SHREDS = plain("cucumber_shreds");
+    /** 豆腐。 */
+    public static final DeferredItem<Item> TOFU = food("tofu", FoodValues.TOFU);
+    /** 豆腐干：豆腐再加工。 */
+    public static final DeferredItem<Item> DRIED_TOFU = food("dried_tofu", FoodValues.DRIED_TOFU);
+    /** 羊奶干酪。 */
+    public static final DeferredItem<Item> GOAT_MILK_CHEESE = plain("goat_milk_cheese");
+    /** 米粉：需要再煮，所以不可直接食用。 */
+    public static final DeferredItem<Item> RICE_NOODLES = plain("rice_noodles");
+
+    // ---- 调味料 ----
+    // ⚠️ 注意：`vinegar` / `coffee` / `peanut_butter` / 各种 *jam / juice / soy_sauce
+    //    **不在这个文件里注册** —— 它们是 ModFluids 的流体，由 `MilkLike` 自动生成
+    //    同名物品（瓶装或碗装）。在这里再写一次会 "Duplicate registration"。
+    /** 辣椒粉。 */
+    public static final DeferredItem<Item> CHILI_POWDER = plain("chili_powder");
+    /** 干辣椒。 */
+    public static final DeferredItem<Item> DRIED_CHILI = plain("dried_chili");
+
+    // ---- 五种茶（都是制茶原料，不可直接吃）----
+    /** 绿茶茶叶。 */
+    public static final DeferredItem<Item> GREEN_TEA_LEAVES = plain("green_tea_leaves");
+    /** 白茶茶叶。 */
+    public static final DeferredItem<Item> WHITE_TEA_LEAVES = plain("white_tea_leaves");
+    /** 黄茶茶叶。 */
+    public static final DeferredItem<Item> YELLOW_TEA_LEAVES = plain("yellow_tea_leaves");
+    /** 乌龙茶茶叶。 */
+    public static final DeferredItem<Item> OOLONG_TEA_LEAVES = plain("oolong_tea_leaves");
+    /** 红茶茶叶。 */
+    public static final DeferredItem<Item> BLACK_TEA_LEAVES = plain("black_tea_leaves");
     /** 蜜渍浆果：与 Create 联动（蜂蜜流体）。数值对齐 Create 的巧克力包层浆果。 */
     public static final DeferredItem<Item> HONEYED_BERRIES =
             createCompat("honeyed_berries", () -> new Item(new Item.Properties().food(FoodValues.HONEYED_BERRIES)));
@@ -212,6 +284,10 @@ public final class ModItems {
      */
     public static final DeferredItem<Item> MANURE = registerWithTab("manure",
             () -> new dev.rhaaaaaast1.foodindustry.common.item.ManureItem(new Item.Properties()));
+
+    // ==================================================================
+    //  发酵木桶（暂时移除，见 ModBlocks 末尾的说明）
+    // ==================================================================
 
     // ==================================================================
     //  流体的桶与瓶
@@ -289,11 +365,6 @@ public final class ModItems {
     /** 注册物品但不放进创造标签（例如仅由合成/掉落获得的中间产物）。 */
     public static <T extends Item> DeferredItem<T> registerHidden(String name, Supplier<T> factory) {
         return ITEMS.register(name, factory);
-    }
-
-    /** 依赖 Create 的物品（{@link #CREATE_COMPAT_ITEMS} 的只读视图，供自检与诊断使用）。 */
-    public static Set<Supplier<? extends Item>> createCompatItems() {
-        return Collections.unmodifiableSet(CREATE_COMPAT_ITEMS);
     }
 
     /** 供 {@link ModCreativeTabs} 读取，外部只读。 */

@@ -126,6 +126,63 @@ public final class FoodValues {
     public static final FoodProperties SLICKERS = new FoodProperties.Builder()
             .nutrition(6).saturationModifier(0.8F).alwaysEdible().build();
 
+    // ------------------------------------------------------------------
+    //  食材扩充（鱼/肉/蔬菜/豆制品/寿司）
+    //  数值出处：**农夫乐事的同类物品**（FD 是最直接的参照系）与原版 FOOD 表，
+    //  下面每条都标了具体对齐对象。
+    // ------------------------------------------------------------------
+
+    /** 生蛙腿：1 点 / 0.1 + {@code fast()}。出处：对齐 {@code RAW_FISH_SLICE}（本模组）与 FD {@code COD_SLICE}。 */
+    public static final FoodProperties RAW_FROG_LEG = new FoodProperties.Builder()
+            .nutrition(1).saturationModifier(0.1F).fast().build();
+
+    /**
+     * 熟蛙腿：3 点 / 0.5 + {@code fast()}。
+     * 出处：FD {@code COOKED_COD_SLICE}（3 / 0.5 + fast）—— 同属"小份熟肉"。
+     */
+    public static final FoodProperties COOKED_FROG_LEG = new FoodProperties.Builder()
+            .nutrition(3).saturationModifier(0.5F).fast().build();
+
+    /**
+     * 生海龟肉：3 点 / 0.3。出处：原版 {@code Foods.BEEF}/{@code PORKCHOP}/{@code RABBIT}
+     * 全是 3 / 0.3 —— 生肉的标准档。
+     */
+    public static final FoodProperties RAW_MEAT = new FoodProperties.Builder()
+            .nutrition(3).saturationModifier(0.3F).build();
+
+    /**
+     * 熟海龟肉：7 点 / 0.7。出处：夹在原版 {@code COOKED_RABBIT}（5 / 0.6）与
+     * {@code COOKED_BEEF}（8 / 0.8）之间 —— 海龟是稀有 mob，取略高于兔、略低于牛。
+     */
+    public static final FoodProperties COOKED_MEAT = new FoodProperties.Builder()
+            .nutrition(7).saturationModifier(0.7F).build();
+
+    /** 茄子：2 点 / 0.3。出处：对齐本模组 {@code VEGETABLE} 与原版 {@code Foods.MELON_SLICE}。 */
+    public static final FoodProperties EGGPLANT = new FoodProperties.Builder()
+            .nutrition(2).saturationModifier(0.3F).build();
+
+    /**
+     * 寿司（鳕鱼卷/鲑鱼卷这类）：7 点 / 0.6。
+     * 出处：FD {@code COD_ROLL} 与 {@code SALMON_ROLL} **都是** 7 / 0.6。
+     */
+    public static final FoodProperties SUSHI = new FoodProperties.Builder()
+            .nutrition(7).saturationModifier(0.6F).build();
+
+    /**
+     * 豆腐：2 点 / 0.4。
+     * 出处：FD 没有 TOFU 常量（它的豆腐是食材），这里取"素食蛋白"档，
+     * 与 FD {@code ONION}/{@code CABBAGE}（2 / 0.4）一致。
+     */
+    public static final FoodProperties TOFU = new FoodProperties.Builder()
+            .nutrition(2).saturationModifier(0.4F).build();
+
+    /**
+     * 豆腐干：4 点 / 0.5。出处：比生豆腐更"浓缩"的加工品，
+     * 取 FD {@code WHEAT_DOUGH} 那一档的加工程度（4 点）配 0.5 的饱和度。
+     */
+    public static final FoodProperties DRIED_TOFU = new FoodProperties.Builder()
+            .nutrition(4).saturationModifier(0.5F).build();
+
     private FoodValues() {
     }
 }
